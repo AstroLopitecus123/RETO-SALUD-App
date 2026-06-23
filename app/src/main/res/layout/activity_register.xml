@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingVertical="20dp">
+
+            <ImageView
+                android:id="@+id/ivLogoRegistro"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:src="@drawable/logo_full"
+                android:scaleType="centerInside"
+                android:layout_marginBottom="10dp"/>
+
+            <TextView
+                android:id="@+id/tvTituloRegistro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Registro"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_green"
+                android:layout_marginBottom="20dp"/>
+
+            <LinearLayout
+                android:id="@+id/layoutForm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp">
+
+                <EditText
+                    android:id="@+id/etNombre"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:hint="Nombre"
+                    android:paddingHorizontal="16dp"
+                    android:background="@drawable/bg_input"
+                    android:textColor="@color/dark_slate"
+                    android:layout_marginBottom="12dp"/>
+
+                <EditText
+                    android:id="@+id/etApellido"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:hint="Apellido"
+                    android:paddingHorizontal="16dp"
+                    android:background="@drawable/bg_input"
+                    android:textColor="@color/dark_slate"
+                    android:layout_marginBottom="12dp"/>
+
+                <EditText
+                    android:id="@+id/etDni"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:hint="DNI"
+                    android:inputType="number"
+                    android:paddingHorizontal="16dp"
+                    android:background="@drawable/bg_input"
+                    android:textColor="@color/dark_slate"
+                    android:layout_marginBottom="12dp"/>
+
+                <EditText
+                    android:id="@+id/etTelefono"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:hint="Teléfono"
+                    android:inputType="phone"
+                    android:paddingHorizontal="16dp"
+                    android:background="@drawable/bg_input"
+                    android:textColor="@color/dark_slate"
+                    android:layout_marginBottom="12dp"/>
+
+                <EditText
+                    android:id="@+id/etFechaNacimiento"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:hint="Fecha de Nacimiento"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:paddingHorizontal="16dp"
+                    android:background="@drawable/bg_input"
+                    android:textColor="@color/dark_slate"
+                    android:layout_marginBottom="12dp"/>
+
+                <EditText
+                    android:id="@+id/etCorreo"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:hint="Correo Electrónico"
+                    android:inputType="textEmailAddress"
+                    android:paddingHorizontal="16dp"
+                    android:background="@drawable/bg_input"
+                    android:textColor="@color/dark_slate"
+                    android:layout_marginBottom="12dp"/>
+
+                <EditText
+                    android:id="@+id/etPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:hint="Contraseña"
+                    android:inputType="textPassword"
+                    android:paddingHorizontal="16dp"
+                    android:background="@drawable/bg_input"
+                    android:textColor="@color/dark_slate"
+                    android:layout_marginBottom="24dp"/>
+
+                <Button
+                    android:id="@+id/btnRegistrar"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="Registrarse"
+                    android:textAllCaps="false"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/primary_green"
+                    app:cornerRadius="12dp"/>
+
+                <TextView
+                    android:id="@+id/tvLogin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="¿Ya tienes cuenta? Inicia sesión"
+                    android:textColor="@color/primary_green"
+                    android:textSize="15sp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    android:padding="10dp"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

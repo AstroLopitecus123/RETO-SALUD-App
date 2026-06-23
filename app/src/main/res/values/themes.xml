@@ -1,0 +1,60 @@
+<!-- EDITADO POR ASTRO - Colores y estilos base -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.REPOSALUD" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="toolbarStyle">@style/CustomToolbar</item>
+    </style>
+
+    <style name="CustomToolbarTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CustomToolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="titleTextAppearance">@style/CustomToolbarTitle</item>
+    </style>
+
+    <style name="Theme.REPOSALUD" parent="Base.Theme.REPOSALUD" />
+
+    <style name="CalendarDay">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:textColor">@color/dark_slate</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="TimeSlot">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:background">@drawable/bg_pill_unselected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingVertical">10dp</item>
+        <item name="android:textColor">@color/light_text</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="SummaryRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <!-- EDITADO POR ASTRO - Pantalla de inicio Splash -->
+    <style name="Theme.REPOSALUD.Splash" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">@color/primary_green</item>
+        <item name="android:windowSplashScreenBackground">@color/primary_green</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/logo_inset</item>
+        <item name="android:statusBarColor">@color/primary_green</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

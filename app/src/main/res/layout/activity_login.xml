@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EDITADO POR ASTRO - Login con logo -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:src="@drawable/logo_full"
+            android:scaleType="centerInside"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/tvSubtitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Inicia sesión para continuar"
+            android:textSize="16sp"
+            android:textColor="@color/light_text"
+            android:layout_marginBottom="32dp"/>
+
+        <LinearLayout
+            android:id="@+id/layoutForm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp">
+
+            <EditText
+                android:id="@+id/etCorreo"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:hint="Correo"
+                android:inputType="textEmailAddress"
+                android:paddingHorizontal="16dp"
+                android:background="@drawable/bg_input"
+                android:textColor="@color/dark_slate"
+                android:layout_marginBottom="16dp"/>
+
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:hint="Contraseña"
+                android:inputType="textPassword"
+                android:paddingHorizontal="16dp"
+                android:background="@drawable/bg_input"
+                android:textColor="@color/dark_slate"
+                android:layout_marginBottom="32dp"/>
+
+            <Button
+                android:id="@+id/btnLogin"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Iniciar Sesión"
+                android:textAllCaps="false"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary_green"
+                app:cornerRadius="12dp"/>
+
+            <!-- EDITADO POR ASTRO - Botón Google -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGoogle"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="16dp"
+                android:text="Acceder con Google"
+                android:textColor="@color/black"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/white"
+                app:icon="@drawable/logo_google_login"
+                app:iconTint="@null"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:strokeColor="@color/soft_gray"
+                app:strokeWidth="1dp"
+                app:cornerRadius="12dp" />
+
+            <TextView
+                android:id="@+id/tvRegistrar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¿No tienes cuenta? Regístrate aquí"
+                android:textColor="@color/primary_green"
+                android:textSize="15sp"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:padding="10dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,205 @@
+package com.example.reposalud.activities;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.reposalud.R;
+import com.example.reposalud.database.UsuarioDAO;
+import com.example.reposalud.network.ApiService;
+import com.example.reposalud.network.RetrofitClient;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
+
+public class LoginActivity extends AppCompatActivity {
+
+    EditText etCorreo, etPassword;
+    Button btnLogin;
+    TextView tvRegistrar;
+    UsuarioDAO usuarioDAO;
+    GoogleSignInClient mGoogleSignInClient;
+    private static final int RC_SIGN_IN = 9001;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_REPOSALUD);
+        super.onCreate(savedInstanceState);
+
+        // --- VERIFICAR AUTOLOGIN ---
+        android.content.SharedPreferences prefsAjustes = getSharedPreferences("AjustesApp", MODE_PRIVATE);
+        boolean mantenerSesion = prefsAjustes.getBoolean("mantener_sesion", false);
+        
+        android.content.SharedPreferences prefsUser = getSharedPreferences("user_session", MODE_PRIVATE);
+        boolean isLoggedIn = prefsUser.getBoolean("is_logged_in", false);
+        
+        if (mantenerSesion && isLoggedIn) {
+            String nombre = prefsUser.getString("user_name", "Usuario");
+            int id = prefsUser.getInt("id_usuario", -1);
+            // No pasamos token aún para no complicar, asumiendo offline o guardado si es necesario.
+            // Si necesitamos token completo, habría que extraerlo, pero por ahora solo el intent
+            Intent intent = new Intent(this, HomeActivity.class);
+            intent.putExtra("nombre_usuario", nombre);
+            intent.putExtra("id_usuario", id);
+            startActivity(intent);
+            finish();
+            return;
+        }
+        // ---------------------------
+
+        setContentView(R.layout.activity_login);
+
+        etCorreo = findViewById(R.id.etCorreo);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
+        tvRegistrar = findViewById(R.id.tvRegistrar);
+        // la parte del cap
+        usuarioDAO = new UsuarioDAO(this);
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken("473447043826-0d5crfghn3m7cug1ibfefnr24lsmp5g8.apps.googleusercontent.com")
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        findViewById(R.id.btnGoogle).setOnClickListener(v -> {
+            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        });
+
+        tvRegistrar.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
+
+        btnLogin.setOnClickListener(v -> {
+            String correo = etCorreo.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+
+            // Bypass para desarrollo y visualización
+            if (correo.equalsIgnoreCase("admin") || (correo.equals("test@test.com") && password.equals("123456"))) {
+                irAHome("Usuario de Prueba");
+                return;
+            }
+
+            if(correo.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Complete todos los campos", Toast.LENGTH_SHORT).show();
+            } else {
+                // EDITADO POR ASTRO - Intento de Login Remoto en Railway primero
+                ApiService.LoginRequest loginRequest = new ApiService.LoginRequest(correo, password);
+                RetrofitClient.getApiService().login(loginRequest).enqueue(new retrofit2.Callback<ApiService.AuthResponse>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<ApiService.AuthResponse> call, retrofit2.Response<ApiService.AuthResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            // Login exitoso en la nube
+                            String nombre = response.body().nombre;
+                            int idRemoto = response.body().id;
+                            String tokenRemoto = response.body().token;
+                            String fotoUrl = response.body().fotoUrl;
+                            
+                            // Guardar en local para modo offline futuro
+                            if (!usuarioDAO.existeCorreo(correo)) {
+                                usuarioDAO.insertarUsuario(nombre, correo, password);
+                            }
+                            
+                            irAHome(nombre, idRemoto, tokenRemoto, fotoUrl);
+                        } else {
+                            // Si el servidor responde pero con error
+                            Toast.makeText(LoginActivity.this, "Credenciales incorrectas en el servidor", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(retrofit2.Call<ApiService.AuthResponse> call, Throwable t) {
+                        // MODO OFFLINE - Si no hay internet, buscamos en el SQLite local
+                        String nombreLocal = usuarioDAO.obtenerNombreUsuario(correo, password);
+                        if (nombreLocal != null) {
+                            Toast.makeText(LoginActivity.this, "Modo Offline: Sesión iniciada localmente", Toast.LENGTH_SHORT).show();
+                            irAHome(nombreLocal, -1, "", null); // -1 indica que no tenemos ID remoto actual
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Error de conexión y usuario no encontrado localmente", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    // EDITADO POR ASTRO - Google Auth y Sincronizacion con Nube
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                if (account != null) {
+                    String nombre = account.getDisplayName();
+                    String correo = account.getEmail();
+                    String idToken = account.getIdToken();
+
+                    // Guardado local offline (por si acaso)
+                    String nombreFinal = usuarioDAO.registrarOloginGoogle(nombre, correo);
+                    
+                    // Sincronizacion web real con el endpoint /auth/google
+                    if (idToken != null && !idToken.isEmpty()) {
+                        java.util.Map<String, String> body = new java.util.HashMap<>();
+                        body.put("idToken", idToken);
+                        
+                        RetrofitClient.getApiService().loginGoogle(body).enqueue(new retrofit2.Callback<ApiService.AuthResponse>() {
+                            @Override
+                            public void onResponse(retrofit2.Call<ApiService.AuthResponse> call, retrofit2.Response<ApiService.AuthResponse> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    irAHome(nombreFinal, response.body().id, response.body().token, response.body().fotoUrl);
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "Error al sincronizar cuenta de Google con el servidor", Toast.LENGTH_SHORT).show();
+                                    irAHome(nombreFinal, -1, "", null);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(retrofit2.Call<ApiService.AuthResponse> call, Throwable t) {
+                                irAHome(nombreFinal, -1, "", null);
+                            }
+                        });
+                    } else {
+                        irAHome(nombreFinal, -1, "", null);
+                    }
+                }
+            } catch (ApiException e) {
+                Toast.makeText(this, "Error con Google: " + e.getStatusCode(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void irAHome(String nombre) {
+        irAHome(nombre, -1, "", null);
+    }
+
+    private void irAHome(String nombre, int idRemoto, String token, String fotoUrl) {
+        // EDITADO POR ASTRO - Persistencia de sesión extendida con ID, Token y Foto
+        getSharedPreferences("user_session", MODE_PRIVATE)
+                .edit()
+                .putString("user_name", nombre)
+                .putInt("id_usuario", idRemoto)
+                .putString("api_token", token)
+                .putString("foto_url", fotoUrl)
+                .putBoolean("is_logged_in", true)
+                .apply();
+
+        Toast.makeText(this, "Bienvenido " + nombre, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        intent.putExtra("nombre_usuario", nombre);
+        intent.putExtra("id_usuario", idRemoto);
+        startActivity(intent);
+        finish();
+    }
+}

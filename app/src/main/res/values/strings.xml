@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">RETO SALUD</string>
+    <string name="app_title">R.E.T.O Salud</string>
+    <string name="title_schedule_appointment">Agendar Cita</string>
+    <string name="subtitle_schedule_appointment">Completa los pasos para programar tu visita médica.</string>
+
+    <string name="step_specialty">1. Especialidad</string>
+    <string name="see_all">Ver todas</string>
+    <string name="specialty_cardio">Cardiología</string>
+    <string name="specialty_pediatrics">Pediatría</string>
+    <string name="specialty_general">Medicina General</string>
+    <string name="specialty_gyn">Ginecología</string>
+    <string name="specialty_nutrition">Nutrición</string>
+    <string name="specialty_psychology">Psicología</string>
+
+    <string name="step_professional">2. Selecciona un Profesional</string>
+    <string name="step_date_time">3. Fecha y Hora</string>
+    <string name="current_month_year">Octubre 2023</string>
+    <string name="available_times">Horarios disponibles</string>
+    <string name="estimated_duration">🕒 Duración estimada: 45 min</string>
+
+    <string name="step_summary">4. Resumen</string>
+    <string name="label_doctor">Doctor:</string>
+    <string name="label_date">Fecha:</string>
+    <string name="label_time">Hora:</string>
+    <string name="label_cost">Costo Consulta:</string>
+    <string name="not_selected">No seleccionado</string>
+    <string name="not_selected_fem">No seleccionada</string>
+    <string name="consultation_price">$65.00</string>
+    <string name="btn_confirm_appointment">Confirmar Cita</string>
+    <string name="cancellation_policy">Podrás cancelar sin cargo hasta 24h antes.</string>
+
+    <string name="error_incomplete_fields">Por favor completa todos los pasos</string>
+    <string name="success_appointment">¡Cita confirmada exitosamente!</string>
+    <string name="error_appointment">Error al confirmar la cita</string>
+
+    <string name="day_monday">Lunes</string>
+    <string name="day_tuesday">Martes</string>
+    <string name="day_wednesday">Miércoles</string>
+    <string name="day_thursday">Jueves</string>
+    <string name="day_friday">Viernes</string>
+    <string name="day_saturday">Sábado</string>
+    <string name="date_format_october">%1$s, %2$s de Octubre</string>
+
+    <string name="doctor_rating">★ 4.9</string>
+    <string name="doctor_specialist">Especialista</string>
+    <string name="doctor_experience">Experiencia certificada • Calidad A1</string>
+    <string name="no_doctors_available">No hay especialistas disponibles en esta categoría</string>
+    <string name="banner_coming_soon_title">¡Próximamente más especialidades!</string>
+    <string name="banner_coming_soon_desc">Odontología, Dermatología y más especialistas para ti.</string>
+
+    <string name="dialog_success_title">¡Cita Programada!</string>
+    <string name="dialog_success_message">Tu cita con %1$s ha sido agendada para el %2$s a las %3$s.</string>
+    <string name="dialog_btn_ok">Entendido</string>
+    <string name="desc_pediatria">Brindamos atención médica integral para bebés, niños y adolescentes. Nuestro enfoque se centra en el desarrollo físico, emocional y social de tu hijo desde el nacimiento hasta la adolescencia.</string>
+    <string name="desc_cardiologia">Especialistas en la salud de tu corazón. Contamos con tecnología avanzada para el diagnóstico y tratamiento de enfermedades cardiovasculares.</string>
+    <string name="desc_medicina_general">Atención primaria para toda la familia. Realizamos chequeos preventivos, tratamiento de enfermedades comunes y seguimiento de salud.</string>
+    <string name="desc_ginecologia">Cuidado integral de la salud femenina en todas las etapas de la vida, incluyendo control prenatal, salud reproductiva y prevención.</string>
+    <string name="desc_nutricion">Planes de alimentación personalizados para mejorar tu calidad de vida y alcanzar tus objetivos de salud mediante una nutrición balanceada.</string>
+    <string name="desc_psicologia">Apoyo profesional para tu salud mental. Te ayudamos a superar retos emocionales y mejorar tu bienestar psicológico.</string>
+
+    <string name="label_servicios_destacados">Servicios Destacados</string>
+    <string name="label_nuestros_especialistas">Nuestros Especialistas</string>
+    <string name="btn_agendar_general">Agendar Cita General</string>
+    <string name="rating_placeholder">⭐ 4.9 (120+ reseñas)</string>
+    <string name="label_immediate_attention">Atención Inmediata</string>
+</resources>
