@@ -29,6 +29,22 @@
             android:textColor="@color/secondary_green"
             android:textSize="20sp"
             android:textStyle="bold" />
+            
+        <TextView
+            android:id="@+id/tvOfflineMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_pill_selected"
+            android:backgroundTint="#D32F2F"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:text="Modo Sin Conexión"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
     </LinearLayout>
 
     <androidx.cardview.widget.CardView

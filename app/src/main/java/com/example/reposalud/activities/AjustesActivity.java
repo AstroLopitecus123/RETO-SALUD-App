@@ -15,7 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.reposalud.R;
 
-public class AjustesActivity extends AppCompatActivity {
+public class AjustesActivity extends BaseActivity {
 
     private Switch switchNotificaciones;
 
@@ -57,4 +57,11 @@ public class AjustesActivity extends AppCompatActivity {
         });
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }
+
+

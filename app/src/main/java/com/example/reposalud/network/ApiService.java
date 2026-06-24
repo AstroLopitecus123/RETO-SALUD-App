@@ -165,6 +165,7 @@ public interface ApiService {
         public String token;
         public int id;
         public String nombre;
+        public String apellido;
         public String correo;
         public String fotoUrl;
     }
@@ -238,5 +239,16 @@ public interface ApiService {
     Call<PaymentIntentResponse> createPaymentIntent(
             @retrofit2.http.Header("Authorization") String token,
             @Body java.util.Map<String, Object> body
+    );
+
+    class TeleconsultaConfigResponse {
+        public String agoraAppId;
+        public String agoraToken;
+    }
+
+    @GET("api/teleconsulta/config")
+    Call<TeleconsultaConfigResponse> getTeleconsultaConfig(
+            @retrofit2.http.Header("Authorization") String token,
+            @retrofit2.http.Query("canal") String canal
     );
 }

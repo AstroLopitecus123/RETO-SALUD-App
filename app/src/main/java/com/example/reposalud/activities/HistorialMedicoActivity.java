@@ -26,7 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HistorialMedicoActivity extends AppCompatActivity {
+public class HistorialMedicoActivity extends BaseActivity {
 
     private LinearLayout containerHistorial;
     private TextView tvEmptyState;
@@ -201,4 +201,11 @@ public class HistorialMedicoActivity extends AppCompatActivity {
 
         containerHistorial.addView(card);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }
+
+

@@ -16,7 +16,7 @@ import com.example.reposalud.R;
 import com.example.reposalud.database.CitaDAO;
 import java.util.Locale;
 
-public class ListaDoctoresActivity extends AppCompatActivity {
+public class ListaDoctoresActivity extends BaseActivity {
 
     private CitaDAO citaDAO;
     private LinearLayout containerDoctores;
@@ -29,6 +29,7 @@ public class ListaDoctoresActivity extends AppCompatActivity {
 
         com.example.reposalud.utils.NavigationHelper.setupBottomNavigation(this);
         citaDAO = new CitaDAO(this);
+        citaDAO.limpiarDuplicadosOffline();
 
         //-----HELIAN CAMBIÓ ESTO
         containerDoctores = findViewById(R.id.containerDoctores);
@@ -80,6 +81,7 @@ public class ListaDoctoresActivity extends AppCompatActivity {
                     } else if (imagenDb.startsWith("http")) {
                         com.bumptech.glide.Glide.with(this)
                             .load(imagenDb)
+                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
                             .placeholder(R.drawable.logo_solo)
                             .error(R.drawable.logo_solo)
                             .into(ivDoctor);
@@ -112,6 +114,7 @@ public class ListaDoctoresActivity extends AppCompatActivity {
             @Override
             public void onResponse(retrofit2.Call<java.util.List<com.example.reposalud.network.ApiService.MedicoResponse>> call, retrofit2.Response<java.util.List<com.example.reposalud.network.ApiService.MedicoResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    citaDAO.limpiarDoctores();
                     boolean nuevosInsertados = false;
                     for (com.example.reposalud.network.ApiService.MedicoResponse m : response.body()) {
                         String prefijo = "Dr. "; // O Dra., pero mantendremos Dr. genérico
@@ -142,3 +145,5 @@ public class ListaDoctoresActivity extends AppCompatActivity {
         });
     }
 }
+
+

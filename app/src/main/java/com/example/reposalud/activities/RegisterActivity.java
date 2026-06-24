@@ -17,7 +17,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends BaseActivity {
 
     EditText etNombre, etApellido, etDni, etTelefono, etFechaNacimiento, etCorreo, etPassword;
     Button btnRegistrar;
@@ -71,7 +71,10 @@ public class RegisterActivity extends AppCompatActivity {
         usuarioDAO = new UsuarioDAO(this);
 
         btnRegistrar.setOnClickListener(v -> {
-
+            if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+                android.widget.Toast.makeText(this, "No disponible en modo sin conexión", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
             String nombre = etNombre.getText().toString().trim();
             String apellido = etApellido.getText().toString().trim();
             String dni = etDni.getText().toString().trim();

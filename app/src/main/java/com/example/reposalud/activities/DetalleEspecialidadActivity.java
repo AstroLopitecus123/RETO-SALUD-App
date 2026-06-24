@@ -14,7 +14,7 @@ import com.example.reposalud.R;
 import com.example.reposalud.database.CitaDAO;
 import java.util.Locale;
 
-public class DetalleEspecialidadActivity extends AppCompatActivity {
+public class DetalleEspecialidadActivity extends BaseActivity {
 
     private int especialidadId;
     private String especialidadNombre;
@@ -134,6 +134,7 @@ public class DetalleEspecialidadActivity extends AppCompatActivity {
                     if (imagen.startsWith("http")) {
                         com.bumptech.glide.Glide.with(this)
                             .load(imagen)
+                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
                             .placeholder(R.drawable.logo_solo)
                             .error(R.drawable.logo_solo)
                             .into(ivDoctor);
@@ -176,3 +177,4 @@ public class DetalleEspecialidadActivity extends AppCompatActivity {
         }
     }
 }
+

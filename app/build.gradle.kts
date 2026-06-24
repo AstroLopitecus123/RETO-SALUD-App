@@ -45,6 +45,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.stripe:stripe-android:20.35.0")
+    implementation("io.agora.rtc:full-sdk:4.3.0")
+    implementation("com.github.yalantis:ucrop:2.2.9")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

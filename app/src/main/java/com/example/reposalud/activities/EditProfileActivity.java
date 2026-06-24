@@ -17,7 +17,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import com.example.reposalud.database.UsuarioDAO;
 
-public class EditProfileActivity extends AppCompatActivity {
+public class EditProfileActivity extends BaseActivity {
 
     private EditText etNombre, etApellido, etTelefono, etFechaNacimiento, etDni;
     private Button btnGuardar;
@@ -102,6 +102,10 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void guardarCambios() {
+        if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+            Toast.makeText(this, "No disponible en modo sin conexión", Toast.LENGTH_SHORT).show();
+            return;
+        }
         String nombre = etNombre.getText().toString().trim();
         String apellido = etApellido.getText().toString().trim();
         String telefono = etTelefono.getText().toString().trim();
@@ -145,4 +149,11 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }
+
+

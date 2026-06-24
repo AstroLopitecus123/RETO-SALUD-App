@@ -30,6 +30,12 @@ public class CitaDAO {
         db.execSQL(query);
     }
 
+    public void limpiarCitasLocales(int usuarioId) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete("citas", "usuario_id = ?", new String[]{String.valueOf(usuarioId)});
+        db.close();
+    }
+
     public boolean insertarCita(int usuarioId, int doctorId, String fecha, String hora, String estado) {
         // la parte del cap
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -97,8 +103,45 @@ public class CitaDAO {
         return existe;
     }
 
-    public int obtenerIdEspecialidad(String nombre) {
+    public int obtenerOInsertarDoctor(String nombre, int especialidadId, String imagen, int backendId) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT id FROM doctores WHERE nombre = ?", new String[]{nombre});
+        if (cursor.moveToFirst()) {
+            int id = cursor.getInt(0);
+            cursor.close();
+            db.execSQL("UPDATE doctores SET backend_id = ? WHERE id = ?", new Object[]{backendId, id});
+            return id;
+        }
+        cursor.close();
+
+        ContentValues values = new ContentValues();
+        values.put("backend_id", backendId);
+        values.put("nombre", nombre);
+        values.put("especialidad_id", especialidadId);
+        values.put("horario", "Pendiente");
+        values.put("biografia", "Información profesional del especialista no disponible por el momento.");
+        values.put("rating", 5.0f);
+        values.put("experiencia", 0);
+        values.put("reviews", 0);
+        values.put("imagen", imagen);
+        long newId = db.insert("doctores", null, values);
+        return (int) newId;
+    }
+
+    public void limpiarDoctores() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete("doctores", "backend_id != -1", null);
+        db.close();
+    }
+
+    public void limpiarDuplicadosOffline() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete("doctores", "backend_id != -1 AND nombre NOT LIKE 'Dr. %' AND nombre NOT LIKE 'Dra. %'", null);
+        db.close();
+    }
+
+    public int obtenerIdEspecialidad(String nombre) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT id FROM especialidades WHERE nombre = ?", new String[]{nombre});
         int id = -1;
         if (cursor.moveToFirst()) {

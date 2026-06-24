@@ -19,7 +19,7 @@ import com.example.reposalud.utils.NavigationHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EspecialidadesActivity extends AppCompatActivity {
+public class EspecialidadesActivity extends BaseActivity {
 
     private RecyclerView rvEspecialidades;
     private DataBaseHelper dbHelper;
@@ -103,6 +103,10 @@ public class EspecialidadesActivity extends AppCompatActivity {
             holder.ivIcon.setImageResource(iconRes);
 
             holder.itemView.setOnClickListener(v -> {
+                if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(EspecialidadesActivity.this)) {
+                    android.widget.Toast.makeText(EspecialidadesActivity.this, "No disponible en modo sin conexión", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Intent intent = new Intent(EspecialidadesActivity.this, DetalleEspecialidadActivity.class);
                 intent.putExtra("especialidad_id", e.id);
                 intent.putExtra("especialidad_nombre", e.nombre);
@@ -124,3 +128,5 @@ public class EspecialidadesActivity extends AppCompatActivity {
         }
     }
 }
+
+

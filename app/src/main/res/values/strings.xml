@@ -26,7 +26,7 @@
     <string name="label_cost">Costo Consulta:</string>
     <string name="not_selected">No seleccionado</string>
     <string name="not_selected_fem">No seleccionada</string>
-    <string name="consultation_price">$65.00</string>
+    <string name="consultation_price">S/.65.00</string>
     <string name="btn_confirm_appointment">Confirmar Cita</string>
     <string name="cancellation_policy">Podrás cancelar sin cargo hasta 24h antes.</string>
 

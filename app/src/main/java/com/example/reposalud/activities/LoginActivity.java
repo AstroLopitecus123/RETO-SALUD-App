@@ -20,7 +20,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
     EditText etCorreo, etPassword;
     Button btnLogin;
@@ -62,6 +62,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         tvRegistrar = findViewById(R.id.tvRegistrar);
         // la parte del cap
+
         usuarioDAO = new UsuarioDAO(this);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -71,11 +72,19 @@ public class LoginActivity extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         findViewById(R.id.btnGoogle).setOnClickListener(v -> {
+            if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+                Toast.makeText(this, "No disponible en modo sin conexión", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
         });
 
         tvRegistrar.setOnClickListener(v -> {
+            if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(LoginActivity.this)) {
+                Toast.makeText(LoginActivity.this, "No disponible en modo sin conexión", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
@@ -99,18 +108,30 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(retrofit2.Call<ApiService.AuthResponse> call, retrofit2.Response<ApiService.AuthResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            // Login exitoso en la nube
-                            String nombre = response.body().nombre;
-                            int idRemoto = response.body().id;
-                            String tokenRemoto = response.body().token;
-                            String fotoUrl = response.body().fotoUrl;
-                            
-                            // Guardar en local para modo offline futuro
-                            if (!usuarioDAO.existeCorreo(correo)) {
-                                usuarioDAO.insertarUsuario(nombre, correo, password);
+                            ApiService.AuthResponse authResponse = response.body();
+                            if (authResponse != null) {
+                                String fotoUrl = authResponse.fotoUrl;
+                                int backendId = authResponse.id;
+                                String nombreCompleto = authResponse.nombre;
+                                if (authResponse.apellido != null && !authResponse.apellido.isEmpty()) {
+                                    nombreCompleto += " " + authResponse.apellido;
+                                }
+                                
+                                // Guardar datos permanentes para modo offline
+                                android.content.SharedPreferences offlinePrefs = getSharedPreferences("offline_users", MODE_PRIVATE);
+                                offlinePrefs.edit()
+                                    .putInt(correo + "_id", backendId)
+                                    .putString(correo + "_foto", fotoUrl)
+                                    .putString(correo + "_nombre", nombreCompleto)
+                                    .apply();
+
+                                // Si el login web fue exitoso, guardamos/actualizamos en el SQLite local
+                                if (!usuarioDAO.existeCorreo(correo)) {
+                                    usuarioDAO.insertarUsuario(nombreCompleto, correo, password);
+                                }
+
+                                irAHome(nombreCompleto, backendId, authResponse.token, fotoUrl);
                             }
-                            
-                            irAHome(nombre, idRemoto, tokenRemoto, fotoUrl);
                         } else {
                             // Si el servidor responde pero con error
                             Toast.makeText(LoginActivity.this, "Credenciales incorrectas en el servidor", Toast.LENGTH_SHORT).show();
@@ -119,13 +140,18 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(retrofit2.Call<ApiService.AuthResponse> call, Throwable t) {
-                        // MODO OFFLINE - Si no hay internet, buscamos en el SQLite local
+                        // Intento de login offline
                         String nombreLocal = usuarioDAO.obtenerNombreUsuario(correo, password);
                         if (nombreLocal != null) {
-                            Toast.makeText(LoginActivity.this, "Modo Offline: Sesión iniciada localmente", Toast.LENGTH_SHORT).show();
-                            irAHome(nombreLocal, -1, "", null); // -1 indica que no tenemos ID remoto actual
+                            android.content.SharedPreferences offlinePrefs = getSharedPreferences("offline_users", MODE_PRIVATE);
+                            int idRemoto = offlinePrefs.getInt(correo + "_id", -1);
+                            String fotoUrl = offlinePrefs.getString(correo + "_foto", null);
+                            String nombreCompleto = offlinePrefs.getString(correo + "_nombre", nombreLocal);
+                            
+                            irAHome(nombreCompleto, idRemoto, "", fotoUrl);
+                            Toast.makeText(LoginActivity.this, "Modo sin conexión", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(LoginActivity.this, "Error de conexión y usuario no encontrado localmente", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Credenciales inválidas o sin acceso previo", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -138,6 +164,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
+            Toast.makeText(this, "Verificando cuenta de Google, por favor espera...", Toast.LENGTH_LONG).show();
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
@@ -185,14 +212,16 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void irAHome(String nombre, int idRemoto, String token, String fotoUrl) {
-        // EDITADO POR ASTRO - Persistencia de sesión extendida con ID, Token y Foto
-        getSharedPreferences("user_session", MODE_PRIVATE)
-                .edit()
+        android.content.SharedPreferences prefs = getSharedPreferences("user_session", MODE_PRIVATE);
+        if (fotoUrl == null) {
+            fotoUrl = prefs.getString("foto_url", null);
+        }
+        prefs.edit()
+                .putBoolean("is_logged_in", true)
                 .putString("user_name", nombre)
                 .putInt("id_usuario", idRemoto)
                 .putString("api_token", token)
                 .putString("foto_url", fotoUrl)
-                .putBoolean("is_logged_in", true)
                 .apply();
 
         Toast.makeText(this, "Bienvenido " + nombre, Toast.LENGTH_SHORT).show();

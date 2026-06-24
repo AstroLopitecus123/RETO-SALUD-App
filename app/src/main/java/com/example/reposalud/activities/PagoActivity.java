@@ -25,7 +25,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PagoActivity extends AppCompatActivity {
+public class PagoActivity extends BaseActivity {
 
     private String publishableKey = "pk_test_51SGkZhLdAZIW17N1eAhoP5LkSMpTzCKj8MW3OfQqpKvmHhiPs7MKQMqz1NWBpXY2QYyxbvAteKF0qK4YUA35rGbX00BhQCWlue";
     private PaymentLauncher paymentLauncher;
@@ -69,7 +69,7 @@ public class PagoActivity extends AppCompatActivity {
         hora = getIntent().getStringExtra("hora");
         precioStr = getIntent().getStringExtra("precio");
         if (precioStr == null || precioStr.isEmpty()) {
-            precioStr = "$65.00";
+            precioStr = "S/.65.00";
         }
 
         amountInCents = 6500;
@@ -204,7 +204,7 @@ public class PagoActivity extends AppCompatActivity {
         
         Map<String, Object> body = new HashMap<>();
         body.put("amount", amountInCents);
-        body.put("currency", "usd"); // Asumiendo USD porque muestra $65.00
+        body.put("currency", "pen"); // Moneda Soles peruanos
 
         RetrofitClient.getApiService().createPaymentIntent("Bearer " + token, body)
                 .enqueue(new Callback<ApiService.PaymentIntentResponse>() {
@@ -303,4 +303,11 @@ public class PagoActivity extends AppCompatActivity {
             .setCancelable(false)
             .show();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }
+
+

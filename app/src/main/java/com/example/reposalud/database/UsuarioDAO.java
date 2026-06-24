@@ -47,7 +47,23 @@ public class UsuarioDAO {
             nombre = cursor.getString(0);
         }
         cursor.close();
+        db.close();
         return nombre;
+    }
+
+    public int obtenerIdUsuario(String correo, String password) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT id FROM usuarios WHERE correo=? AND password=?",
+                new String[]{correo, password}
+        );
+        int id = -1;
+        if (cursor.moveToFirst()) {
+            id = cursor.getInt(0);
+        }
+        cursor.close();
+        db.close();
+        return id;
     }
 
     public boolean existeCorreo(String correo) {

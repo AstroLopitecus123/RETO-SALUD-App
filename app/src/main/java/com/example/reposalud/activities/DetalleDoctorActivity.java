@@ -15,7 +15,7 @@ import com.example.reposalud.R;
 import com.example.reposalud.database.CitaDAO;
 import java.util.Locale;
 
-public class DetalleDoctorActivity extends AppCompatActivity {
+public class DetalleDoctorActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +91,7 @@ public class DetalleDoctorActivity extends AppCompatActivity {
         if (imagenDb != null && imagenDb.startsWith("http")) {
             com.bumptech.glide.Glide.with(this)
                 .load(imagenDb)
+                .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
                 .placeholder(R.drawable.logo_solo)
                 .error(R.drawable.logo_solo)
                 .into(ivDoctor);
@@ -126,3 +127,4 @@ public class DetalleDoctorActivity extends AppCompatActivity {
         });
     }
 }
+

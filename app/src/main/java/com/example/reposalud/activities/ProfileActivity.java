@@ -26,7 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseActivity {
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private ImageView ivProfileLarge;
@@ -71,12 +71,11 @@ public class ProfileActivity extends AppCompatActivity {
 
         if (nombre != null) {
             tvUserName.setText(nombre);
-            String userDisplayId = (nombre.length() * 123) + "-M";
-            tvUserDetails.setText("ID: " + userDisplayId + " • Sangre O+");
+            tvUserDetails.setVisibility(android.view.View.GONE);
         }
 
         if (fotoUrl != null && !fotoUrl.isEmpty()) {
-            Glide.with(this).load(fotoUrl).into(ivProfileLarge);
+            Glide.with(this).load(fotoUrl).diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL).into(ivProfileLarge);
         }
     }
 
@@ -89,6 +88,10 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Opción: Editar Perfil
         findViewById(R.id.cvEditarPerfil).setOnClickListener(v -> {
+            if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+                android.widget.Toast.makeText(this, "No disponible en modo sin conexión", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(this, EditProfileActivity.class);
             startActivity(intent);
         });
@@ -111,7 +114,13 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Abrir galería al tocar la foto de perfil
         if (ivProfileLarge != null) {
-            ivProfileLarge.setOnClickListener(v -> abrirGaleria());
+            ivProfileLarge.setOnClickListener(v -> {
+                if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+                    android.widget.Toast.makeText(this, "No disponible en modo sin conexión", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                abrirGaleria();
+            });
         }
     }
 
@@ -125,8 +134,34 @@ public class ProfileActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri imageUri = data.getData();
-            subirImagen(imageUri);
+            iniciarUCrop(imageUri);
+        } else if (requestCode == com.yalantis.ucrop.UCrop.REQUEST_CROP && resultCode == RESULT_OK) {
+            Uri resultUri = com.yalantis.ucrop.UCrop.getOutput(data);
+            if (resultUri != null) {
+                subirImagen(resultUri);
+            }
+        } else if (resultCode == com.yalantis.ucrop.UCrop.RESULT_ERROR) {
+            Throwable cropError = com.yalantis.ucrop.UCrop.getError(data);
+            if (cropError != null) {
+                Toast.makeText(this, "Error al editar imagen: " + cropError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
+    }
+
+    private void iniciarUCrop(Uri sourceUri) {
+        Uri destinationUri = Uri.fromFile(new File(getCacheDir(), "uCrop_" + System.currentTimeMillis() + ".jpg"));
+        
+        com.yalantis.ucrop.UCrop.Options options = new com.yalantis.ucrop.UCrop.Options();
+        options.setCircleDimmedLayer(false);
+        options.setShowCropFrame(true);
+        options.setShowCropGrid(true);
+        options.setToolbarTitle("Editar imagen");
+        
+        com.yalantis.ucrop.UCrop.of(sourceUri, destinationUri)
+                .withAspectRatio(1, 1)
+                .withMaxResultSize(1000, 1000)
+                .withOptions(options)
+                .start(this);
     }
 
     private void subirImagen(Uri uri) {
@@ -177,7 +212,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 .apply();
 
                         // Actualizar UI
-                        Glide.with(ProfileActivity.this).load(nuevaFotoUrl).into(ivProfileLarge);
+                        Glide.with(ProfileActivity.this).load(nuevaFotoUrl).diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL).into(ivProfileLarge);
                         
                         Toast.makeText(ProfileActivity.this, "Foto actualizada correctamente", Toast.LENGTH_SHORT).show();
                     } else {
@@ -197,3 +232,5 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 }
+
+

@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class AgendarCitaActivity extends AppCompatActivity {
+public class AgendarCitaActivity extends BaseActivity {
 
     // la parte del cap
     private CitaDAO citaDAO;
@@ -89,6 +89,7 @@ public class AgendarCitaActivity extends AppCompatActivity {
             @Override
             public void onResponse(retrofit2.Call<java.util.List<ApiService.MedicoResponse>> call, retrofit2.Response<java.util.List<ApiService.MedicoResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    citaDAO.limpiarDoctores();
                     boolean nuevosInsertados = false;
                     for (ApiService.MedicoResponse m : response.body()) {
                         String prefijo = "Dr. ";
@@ -138,6 +139,14 @@ public class AgendarCitaActivity extends AppCompatActivity {
         tvEspecialidadDesc = findViewById(R.id.tvEspecialidadDesc);
         containerServicios = findViewById(R.id.containerServiciosEspecialidad);
 
+        TextView tvVerTodas = findViewById(R.id.tvVerTodasEspecialidades);
+        if (tvVerTodas != null) {
+            tvVerTodas.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(this, EspecialidadesActivity.class);
+                startActivity(intent);
+            });
+        }
+
         // Especialidades logic
         setupSpecialtyPills();
 
@@ -146,6 +155,10 @@ public class AgendarCitaActivity extends AppCompatActivity {
         for (int id : dayIds) {
             TextView dayTv = findViewById(id);
             dayTv.setOnClickListener(v -> {
+                if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+                    Toast.makeText(this, "No disponible en modo sin conexión", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 // Reset visual state for all selectable days
                 for (int otherId : dayIds) {
                     TextView otherTv = findViewById(otherId);
@@ -174,7 +187,12 @@ public class AgendarCitaActivity extends AppCompatActivity {
 
         setupTimeSlots();
 
+        // Botón Confirmar
         findViewById(R.id.btnConfirmar).setOnClickListener(v -> {
+            if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+                Toast.makeText(this, "No disponible en modo sin conexión", Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (selectedEspecialidad.isEmpty() || selectedDoctorName.isEmpty() || selectedFecha.isEmpty() || selectedHora.isEmpty()) {
                 Toast.makeText(this, getString(R.string.error_incomplete_fields), Toast.LENGTH_SHORT).show();
                 return;
@@ -204,6 +222,10 @@ public class AgendarCitaActivity extends AppCompatActivity {
 
         for (Map.Entry<Integer, TextView> entry : specialtyPills.entrySet()) {
             entry.getValue().setOnClickListener(v -> {
+                if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+                    Toast.makeText(this, "No disponible en modo sin conexión", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 int id = entry.getKey();
                 String name = entry.getValue().getText().toString();
                 selectEspecialidad(id, name);
@@ -313,7 +335,7 @@ public class AgendarCitaActivity extends AppCompatActivity {
                     android.widget.ImageView ivDoctor = card.findViewById(R.id.ivDoctorItem);
                     String imagenDb = cursor.getString(cursor.getColumnIndexOrThrow("imagen"));
                     if (imagenDb != null && imagenDb.startsWith("http")) {
-                        com.bumptech.glide.Glide.with(AgendarCitaActivity.this).load(imagenDb).into(ivDoctor);
+                        com.bumptech.glide.Glide.with(AgendarCitaActivity.this).load(imagenDb).diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL).into(ivDoctor);
                     } else {
                         if (imagenDb == null || imagenDb.isEmpty()) imagenDb = "logo_solo";
                         int resId = getResources().getIdentifier(imagenDb, "drawable", getPackageName());
@@ -440,6 +462,10 @@ public class AgendarCitaActivity extends AppCompatActivity {
                         dayTv.setText(letter + dayNum);
                         
                         dayTv.setOnClickListener(v -> {
+                            if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(AgendarCitaActivity.this)) {
+                                Toast.makeText(AgendarCitaActivity.this, "No disponible en modo sin conexión", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
                             for (int i=0; i<innerContainer.getChildCount(); i++) {
                                 TextView t = (TextView) innerContainer.getChildAt(i);
                                 t.setBackgroundResource(R.drawable.bg_pill_unselected);
@@ -525,6 +551,10 @@ public class AgendarCitaActivity extends AppCompatActivity {
             timeTv.setText(horaCortada);
 
             timeTv.setOnClickListener(v -> {
+                if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(AgendarCitaActivity.this)) {
+                    Toast.makeText(AgendarCitaActivity.this, "No disponible en modo sin conexión", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 for (int i=0; i<timesGridDynamic.getChildCount(); i++) {
                     TextView t = (TextView) timesGridDynamic.getChildAt(i);
                     t.setBackgroundResource(R.drawable.bg_pill_unselected);
@@ -546,6 +576,10 @@ public class AgendarCitaActivity extends AppCompatActivity {
         for (int id : timeIds) {
             TextView tv = findViewById(id);
             tv.setOnClickListener(v -> {
+                if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+                    Toast.makeText(this, "No disponible en modo sin conexión", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 for (int otherId : timeIds) {
                     TextView otherTv = findViewById(otherId);
                     otherTv.setBackgroundResource(R.drawable.bg_pill_unselected);
@@ -615,4 +649,11 @@ public class AgendarCitaActivity extends AppCompatActivity {
             finish();
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }
+
+

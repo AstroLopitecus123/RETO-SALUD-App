@@ -55,7 +55,6 @@ public class CitasAdapter extends RecyclerView.Adapter<CitasAdapter.CitaViewHold
             holder.tvFechaCita.setText(cita.fecha);
         }
 
-        // Doctor Info
         if (cita.medico != null && cita.medico.usuario != null) {
             holder.tvDoctorNombre.setText("Dr. " + cita.medico.usuario.nombre + " " + cita.medico.usuario.apellido);
             
@@ -65,7 +64,6 @@ public class CitasAdapter extends RecyclerView.Adapter<CitasAdapter.CitaViewHold
                 holder.tvEspecialidadNombre.setText("Especialista");
             }
 
-            // Cargar imagen
             if (cita.medico.usuario.fotoUrl != null && cita.medico.usuario.fotoUrl.startsWith("http")) {
                 Glide.with(context).load(cita.medico.usuario.fotoUrl).into(holder.ivDoctorFoto);
             } else {
@@ -85,15 +83,54 @@ public class CitasAdapter extends RecyclerView.Adapter<CitasAdapter.CitaViewHold
         if (estado.equals("CONFIRMADA")) {
             holder.tvEstadoCita.setTextColor(context.getResources().getColor(R.color.primary_green));
             holder.tvEstadoCita.setBackgroundResource(R.drawable.bg_pill_selected); // Cambiar esto en un futuro si es necesario
-            holder.tvEstadoCita.getBackground().setTint(Color.parseColor("#E8F5E9"));
+            holder.tvEstadoCita.getBackground().mutate().setTint(Color.parseColor("#E8F5E9"));
+            
+            holder.btnTeleconsulta.setVisibility(View.VISIBLE);
+            holder.btnTeleconsulta.setOnClickListener(v -> {
+                if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(context)) {
+                    android.widget.Toast.makeText(context, "Videollamada no disponible en modo sin conexión", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String token = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE).getString("api_token", "");
+                android.widget.Toast.makeText(context, "Conectando a teleconsulta...", android.widget.Toast.LENGTH_SHORT).show();
+                
+                com.example.reposalud.network.RetrofitClient.getApiService()
+                    .getTeleconsultaConfig("Bearer " + token, "cita-" + cita.id)
+                    .enqueue(new retrofit2.Callback<ApiService.TeleconsultaConfigResponse>() {
+                        @Override
+                        public void onResponse(retrofit2.Call<ApiService.TeleconsultaConfigResponse> call, retrofit2.Response<ApiService.TeleconsultaConfigResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                String aId = response.body().agoraAppId;
+                                String aToken = response.body().agoraToken;
+                                if (aId != null && !aId.equals("AGORA_NOT_FOUND") && aToken != null && !aToken.startsWith("ERROR")) {
+                                    android.content.Intent intent = new android.content.Intent(context, com.example.reposalud.activities.TeleconsultaActivity.class);
+                                    intent.putExtra("agora_app_id", aId);
+                                    intent.putExtra("agora_token", aToken);
+                                    intent.putExtra("agora_canal", "cita-" + cita.id);
+                                    context.startActivity(intent);
+                                } else {
+                                    android.widget.Toast.makeText(context, "Error de configuración Agora en el servidor", android.widget.Toast.LENGTH_LONG).show();
+                                }
+                            } else {
+                                android.widget.Toast.makeText(context, "Error al obtener acceso a la sala", android.widget.Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(retrofit2.Call<ApiService.TeleconsultaConfigResponse> call, Throwable t) {
+                            android.widget.Toast.makeText(context, "Error de red: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            });
         } else if (estado.equals("CANCELADA")) {
             holder.tvEstadoCita.setTextColor(Color.parseColor("#D32F2F"));
             holder.tvEstadoCita.setBackgroundResource(R.drawable.bg_pill_selected);
-            holder.tvEstadoCita.getBackground().setTint(Color.parseColor("#FFEBEE"));
+            holder.tvEstadoCita.getBackground().mutate().setTint(Color.parseColor("#FFEBEE"));
         } else {
             holder.tvEstadoCita.setTextColor(Color.parseColor("#1976D2"));
             holder.tvEstadoCita.setBackgroundResource(R.drawable.bg_pill_selected);
-            holder.tvEstadoCita.getBackground().setTint(Color.parseColor("#E3F2FD"));
+            holder.tvEstadoCita.getBackground().mutate().setTint(Color.parseColor("#E3F2FD"));
+            holder.btnTeleconsulta.setVisibility(View.GONE);
         }
     }
 
@@ -110,6 +147,7 @@ public class CitasAdapter extends RecyclerView.Adapter<CitasAdapter.CitaViewHold
     public static class CitaViewHolder extends RecyclerView.ViewHolder {
         TextView tvFechaCita, tvEstadoCita, tvDoctorNombre, tvEspecialidadNombre;
         ImageView ivDoctorFoto;
+        android.widget.LinearLayout btnTeleconsulta;
 
         public CitaViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -118,6 +156,7 @@ public class CitasAdapter extends RecyclerView.Adapter<CitasAdapter.CitaViewHold
             tvDoctorNombre = itemView.findViewById(R.id.tvDoctorNombre);
             tvEspecialidadNombre = itemView.findViewById(R.id.tvEspecialidadNombre);
             ivDoctorFoto = itemView.findViewById(R.id.ivDoctorFoto);
+            btnTeleconsulta = itemView.findViewById(R.id.btnTeleconsulta);
         }
     }
 }

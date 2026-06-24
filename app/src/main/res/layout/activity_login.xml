@@ -26,6 +26,21 @@
             android:layout_marginBottom="16dp"/>
 
         <TextView
+            android:id="@+id/tvOfflineModeLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_pill_selected"
+            android:backgroundTint="#D32F2F"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:text="Modo Sin Conexión"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/tvSubtitulo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

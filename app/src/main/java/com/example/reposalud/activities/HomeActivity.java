@@ -9,8 +9,14 @@ import com.example.reposalud.R;
 import com.example.reposalud.database.CitaDAO;
 // la parte del cap
 import com.example.reposalud.utils.NavigationHelper;
+import com.example.reposalud.network.ApiService;
+import com.example.reposalud.network.RetrofitClient;
+import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends BaseActivity {
 
     private CitaDAO citaDAO;
 
@@ -27,6 +33,10 @@ public class HomeActivity extends AppCompatActivity {
 
         // Configurar botones de navegación
         findViewById(R.id.btnComenzar).setOnClickListener(v -> {
+            if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+                android.widget.Toast.makeText(this, "No disponible en modo sin conexión", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(this, AgendarCitaActivity.class);
             startActivity(intent);
         });
@@ -72,6 +82,10 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void abrirDetalleEspecialidad(int id, String nombre) {
+        if (!com.example.reposalud.utils.NetworkUtils.isNetworkAvailable(this)) {
+            android.widget.Toast.makeText(this, "No disponible en modo sin conexión", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent intent = new Intent(this, DetalleEspecialidadActivity.class);
         intent.putExtra("especialidad_id", id);
         intent.putExtra("especialidad_nombre", nombre);
@@ -81,7 +95,57 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        cargarProximaCita();
+        sincronizarCitasDesdeNube();
+    }
+
+    private void sincronizarCitasDesdeNube() {
+        android.content.SharedPreferences prefs = getSharedPreferences("user_session", MODE_PRIVATE);
+        int usuarioId = prefs.getInt("id_usuario", 1);
+        String token = prefs.getString("api_token", "");
+
+        if (token.isEmpty()) {
+            cargarProximaCita();
+            return;
+        }
+
+        RetrofitClient.getApiService().obtenerCitas("Bearer " + token, usuarioId).enqueue(new Callback<List<ApiService.CitaResponse>>() {
+            @Override
+            public void onResponse(Call<List<ApiService.CitaResponse>> call, Response<List<ApiService.CitaResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    citaDAO.limpiarCitasLocales(usuarioId);
+                    for (ApiService.CitaResponse cita : response.body()) {
+                        if (cita.medico != null && cita.medico.usuario != null) {
+                            String nombreDoc = "Dr. " + cita.medico.usuario.nombre + " " + cita.medico.usuario.apellido;
+                            String especialidad = cita.medico.especialidad != null ? cita.medico.especialidad.nombre : "General";
+                            int espId = citaDAO.obtenerIdEspecialidad(especialidad);
+                            String imagen = cita.medico.usuario.fotoUrl != null ? cita.medico.usuario.fotoUrl : "logo_solo";
+                            
+                            int localDocId = citaDAO.obtenerOInsertarDoctor(nombreDoc, espId, imagen, cita.medico.id);
+                            
+                            String fecha = cita.fecha;
+                            String hora = "";
+                            if (fecha != null && fecha.contains("T")) {
+                                String[] parts = fecha.split("T");
+                                fecha = parts[0];
+                                hora = parts.length > 1 && parts[1].length() >= 5 ? parts[1].substring(0, 5) : "00:00";
+                            } else if (fecha != null && fecha.contains(" ")) {
+                                String[] parts = fecha.split(" ");
+                                fecha = parts[0];
+                                hora = parts.length > 1 && parts[1].length() >= 5 ? parts[1].substring(0, 5) : "00:00";
+                            }
+                            
+                            citaDAO.insertarCita(usuarioId, localDocId, fecha, hora, cita.estado);
+                        }
+                    }
+                }
+                cargarProximaCita();
+            }
+
+            @Override
+            public void onFailure(Call<List<ApiService.CitaResponse>> call, Throwable t) {
+                cargarProximaCita();
+            }
+        });
     }
 
     private void cargarProximaCita() {
@@ -119,7 +183,10 @@ public class HomeActivity extends AppCompatActivity {
                 }
 
                 tvFecha.setText(fechaHora);
-                tvDoctor.setText("Dr. " + doctorNombre);
+                if (!doctorNombre.toLowerCase().startsWith("dr.") && !doctorNombre.toLowerCase().startsWith("dra.")) {
+                    doctorNombre = "Dr. " + doctorNombre;
+                }
+                tvDoctor.setText(doctorNombre);
                 tvEspecialidad.setText(especialidadNombre);
 
                 cardProximaCita.setVisibility(android.view.View.VISIBLE);
@@ -133,3 +200,5 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 }
+
+
